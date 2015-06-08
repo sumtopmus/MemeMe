@@ -10,6 +10,7 @@ import UIKit
 
 // TODO: Check why the font is transparent (NSForegroundColorAttributeName does not change the appearance)
 // TODO: If keyboard is dismissed with CMD+K and bottomTextField started editing, press CMD+K again. The meme view will fly away upwards.
+// TODO: Add custom crop/scale for both(?) original and combined images
 
 class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
 
@@ -28,7 +29,7 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
         static let MemeTextBottom = "BOTTOM"
 
         static let TextVerticalOffsetInEditor: CGFloat = 50
-        static let TextVerticalOffsetFinal: CGFloat = 10
+        static let TextVerticalOffsetFinal: CGFloat = 20
 
         static let ToolbarTransparency: CGFloat = 0.95
 
@@ -36,12 +37,15 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
         static let KeyboardWillHideSelector: Selector = "keyboardWillHide:"
     }
 
+    // MARK: - Actions and Outlets
+
     @IBOutlet weak var memeView: UIView!
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var topTextField: UITextField!
     @IBOutlet weak var bottomTextField: UITextField!
 
     @IBOutlet weak var topToolbar: UIToolbar!
+    @IBOutlet weak var shareButton: UIBarButtonItem!
     @IBOutlet weak var bottomToolbar: UIToolbar!
     @IBOutlet weak var cameraButton: UIBarButtonItem!
 
@@ -61,6 +65,20 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
         presentViewController(imagePickerVC, animated: true, completion: nil)
     }
 
+    @IBAction func shareMeme(sender: UIBarButtonItem) {
+        let memeImage = createMemeImage()
+
+        let activityVC = UIActivityViewController(activityItems: [memeImage], applicationActivities: nil)
+        activityVC.completionWithItemsHandler = { (activityType, completed, returnedItems, activityError) -> Void in
+            if let imageToSave = returnedItems?.first as? UIImage {
+                self.saveMeme(imageToSave)
+            }
+//            dismissViewControllerAnimated(true, completion: nil)
+        }
+
+        presentViewController(activityVC, animated: true, completion: nil)
+    }
+    
     // MARK: - Layout
 
     var textOffsetConstraints = [NSLayoutConstraint]()
@@ -85,7 +103,7 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
         memeView.removeConstraints(textOffsetConstraints)
     }
 
-    // MARK: - Text edit
+    // MARK: - Text Edit
 
     var topTextEdited = false
     var bottomTextEdited = false
@@ -165,12 +183,15 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
 
     // MARK: - Meme Generating Engine
 
-    private func createMeme() -> UIImage {
+    private func createMemeImage() -> UIImage {
         setTextOffset(Defaults.TextVerticalOffsetFinal)
 
         UIGraphicsBeginImageContext(memeView.frame.size)
 
-        memeView.drawViewHierarchyInRect(memeView.frame, afterScreenUpdates: true)
+        memeView.drawViewHierarchyInRect(memeView.bounds, afterScreenUpdates: true)
+//        memeView.layer.renderInContext(UIGraphicsGetCurrentContext())
+//        topTextField.layer.renderInContext(UIGraphicsGetCurrentContext())
+//        bottomTextField.layer.renderInContext(UIGraphicsGetCurrentContext())
         let meme = UIGraphicsGetImageFromCurrentImageContext()
 
         UIGraphicsEndImageContext()
@@ -180,12 +201,27 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
         return meme
     }
 
+    private func saveMeme(memeImage: UIImage) {
+        let meme = Meme(originalImage: imageView.image!, topText: topTextField.text, bottomText: bottomTextField.text, memeImage: memeImage)
+
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        appDelegate.memes.append(meme)
+    }
+
     // MARK: - UIImagePickerControllerDelegate methods
 
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [NSObject : AnyObject]) {
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
             imageView.image = image
+            let fill = (image.size.width > image.size.height) == (memeView.bounds.width > memeView.bounds.height)
+            if fill {
+                imageView.contentMode = UIViewContentMode.ScaleAspectFill
+            } else {
+                imageView.contentMode = UIViewContentMode.ScaleAspectFit
+            }
+
             hideTextFields(false)
+            shareButton.enabled = true
         }
         dismissViewControllerAnimated(true, completion: nil)
     }
@@ -194,9 +230,6 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-//        let topSpaceConstraint = NSLayoutConstraint(item: imageView, attribute: NSLayoutAttribute.Top, relatedBy: NSLayoutRelation.Equal, toItem: self.view, attribute: NSLayoutAttribute.Top, multiplier: 1, constant: 0)
-//        self.view.addConstraint(topSpaceConstraint)
 
         cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
 
@@ -209,6 +242,11 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
 
         topToolbar.alpha = Defaults.ToolbarTransparency
         bottomToolbar.alpha = Defaults.ToolbarTransparency
+
+        shareButton.enabled = false
+
+        imageView.contentMode = UIViewContentMode.ScaleAspectFill
+
 
 //        UIApplication.sharedApplication().setStatusBarHidden(true, withAnimation: UIStatusBarAnimation.Fade)
     }

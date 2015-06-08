@@ -17,11 +17,11 @@ class Meme {
 
     private var combinedImage: UIImage
 
-    init(originalImage: UIImage, topText: String, bottomText: String, meme: UIImage) {
+    init(originalImage: UIImage, topText: String, bottomText: String, memeImage: UIImage) {
         self.originalImage = originalImage
         self.topText = topText
         self.bottomText = bottomText
-        self.combinedImage = meme
+        self.combinedImage = memeImage
     }
 
     func getMeme() -> UIImage {
