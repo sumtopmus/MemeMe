@@ -35,6 +35,8 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
 
         static let KeyboardWillShowSelector: Selector = "keyboardWillShow:"
         static let KeyboardWillHideSelector: Selector = "keyboardWillHide:"
+
+        static let TabBarViewControllerID = "Tab Bar View Controller"
     }
 
     // MARK: - Actions and Outlets
@@ -69,11 +71,9 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
         let memeImage = createMemeImage()
 
         let activityVC = UIActivityViewController(activityItems: [memeImage], applicationActivities: nil)
-        activityVC.completionWithItemsHandler = { (activityType, completed, returnedItems, activityError) -> Void in
-            if let imageToSave = returnedItems?.first as? UIImage {
-                self.saveMeme(imageToSave)
-            }
-//            dismissViewControllerAnimated(true, completion: nil)
+        activityVC.completionWithItemsHandler = { (activityType, completed, returnedItems, activityError) in
+            self.saveMeme(memeImage)
+            self.dismissViewControllerAnimated(true, completion: nil)
         }
 
         presentViewController(activityVC, animated: true, completion: nil)
@@ -263,13 +263,16 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
         unsubscribeFromKeyboardNotifications()
     }
 
-    /*
-    // MARK: - Navigation
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        if let image = imageView.image {
+            let fill = (image.size.width > image.size.height) == (memeView.bounds.width > memeView.bounds.height)
+            if fill {
+                imageView.contentMode = UIViewContentMode.ScaleAspectFill
+            } else {
+                imageView.contentMode = UIViewContentMode.ScaleAspectFit
+            }
+        }
     }
-    */
 }

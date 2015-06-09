@@ -11,11 +11,11 @@ import UIKit
 
 class Meme {
 
-    private var originalImage: UIImage
-    private var topText: String
-    private var bottomText: String
+    var originalImage: UIImage
+    var topText: String
+    var bottomText: String
 
-    private var combinedImage: UIImage
+    var combinedImage: UIImage
 
     init(originalImage: UIImage, topText: String, bottomText: String, memeImage: UIImage) {
         self.originalImage = originalImage
