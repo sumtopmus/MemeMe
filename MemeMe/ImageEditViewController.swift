@@ -14,7 +14,7 @@ import UIKit
 
 class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
 
-    // Magic values
+    // MARK: - Magic values
     private struct Defaults {
         static let MemeFontName = "HelveticaNeue-CondensedBlack"
         static let MemeFontSize: CGFloat = 40
@@ -32,6 +32,10 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
         static let TextVerticalOffsetFinal: CGFloat = 20
 
         static let ToolbarTransparency: CGFloat = 0.95
+
+        static let MemesDirectory = "memes"
+        static let DateFormat = "ddMMyyyy-HHmmss"
+        static let ImageExtension = ".png"
 
         static let KeyboardWillShowSelector: Selector = "keyboardWillShow:"
         static let KeyboardWillHideSelector: Selector = "keyboardWillHide:"
@@ -72,8 +76,10 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
 
         let activityVC = UIActivityViewController(activityItems: [memeImage], applicationActivities: nil)
         activityVC.completionWithItemsHandler = { (activityType, completed, returnedItems, activityError) in
-            self.saveMeme(memeImage)
-            self.dismissViewControllerAnimated(true, completion: nil)
+            if completed {
+                self.saveMeme(memeImage)
+                self.dismissViewControllerAnimated(true, completion: nil)
+            }
         }
 
         presentViewController(activityVC, animated: true, completion: nil)
@@ -189,9 +195,6 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
         UIGraphicsBeginImageContext(memeView.frame.size)
 
         memeView.drawViewHierarchyInRect(memeView.bounds, afterScreenUpdates: true)
-//        memeView.layer.renderInContext(UIGraphicsGetCurrentContext())
-//        topTextField.layer.renderInContext(UIGraphicsGetCurrentContext())
-//        bottomTextField.layer.renderInContext(UIGraphicsGetCurrentContext())
         let meme = UIGraphicsGetImageFromCurrentImageContext()
 
         UIGraphicsEndImageContext()
@@ -202,10 +205,31 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
     }
 
     private func saveMeme(memeImage: UIImage) {
-        let meme = Meme(originalImage: imageView.image!, topText: topTextField.text, bottomText: bottomTextField.text, memeImage: memeImage)
+        if let context = CoreDataStackManager.sharedInstance.managedObjectContext {
+            let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first as! String
+            let memesDirectory = documentsDirectory.stringByAppendingPathComponent(Defaults.MemesDirectory)
+            let fileName = ImageEditViewController.getFileNameForNewMeme()
+            let absoluteFilePath = memesDirectory.stringByAppendingPathComponent(fileName)
+            let relativeFilePath = Defaults.MemesDirectory.stringByAppendingPathComponent(fileName)
+            if !NSFileManager.defaultManager().fileExistsAtPath(memesDirectory) {
+                var error: NSError?
+                NSFileManager.defaultManager().createDirectoryAtPath(memesDirectory, withIntermediateDirectories: false, attributes: nil, error: &error)
+            }
+            UIImagePNGRepresentation(memeImage).writeToFile(absoluteFilePath, atomically: true)
 
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        appDelegate.memes.append(meme)
+            let meme = Meme(context: context, pathToEditedImage: relativeFilePath, topText: topTextField.text, bottomText: bottomTextField.text)
+            Model.sharedInstance.memes.append(meme)
+            CoreDataStackManager.sharedInstance.saveContext()
+        }
+    }
+
+    private class func getFileNameForNewMeme() -> String {
+        let currentDateTime = NSDate()
+        let formatter = NSDateFormatter()
+        formatter.dateFormat = Defaults.DateFormat
+        let fileName = formatter.stringFromDate(currentDateTime) + Defaults.ImageExtension
+
+        return fileName
     }
 
     // MARK: - UIImagePickerControllerDelegate methods
@@ -246,9 +270,6 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
         shareButton.enabled = false
 
         imageView.contentMode = UIViewContentMode.ScaleAspectFill
-
-
-//        UIApplication.sharedApplication().setStatusBarHidden(true, withAnimation: UIStatusBarAnimation.Fade)
     }
 
     override func viewWillAppear(animated: Bool) {

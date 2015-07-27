@@ -40,9 +40,6 @@ class SavedMemesCollectionViewController: UICollectionViewController {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
 
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        memes = appDelegate.memes
-
         collectionView?.reloadData()
 
         if memes.count == 0 {
@@ -64,7 +61,7 @@ class SavedMemesCollectionViewController: UICollectionViewController {
     override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(Defaults.MemeCell, forIndexPath: indexPath) as! SavedMemeCollectionViewCell
     
-        cell.memeImage = memes[indexPath.row].getMeme()
+//        cell.memeImage = memes[indexPath.row].getMeme()
 
         return cell
     }
@@ -108,7 +105,7 @@ class SavedMemesCollectionViewController: UICollectionViewController {
             case Defaults.ShowMemeSegue:
                 let showMemeVC = segue.destinationViewController as! ShowMemeViewController
                 if let indexPath = collectionView?.indexPathsForSelectedItems().first as? NSIndexPath {
-                    showMemeVC.meme = memes[indexPath.row]
+//                    showMemeVC.meme = memes[indexPath.row]
                 }
             default:
                 break

@@ -7,10 +7,11 @@
 //
 
 import UIKit
+import CoreData
 
 class SavedMemesTableViewController: UITableViewController {
 
-    // Magic values
+    // MARK: - Magic values
     private struct Defaults {
         static let MemeCell = "Meme Table View Cell"
         static let CellHeight: CGFloat = 80.0
@@ -19,10 +20,6 @@ class SavedMemesTableViewController: UITableViewController {
         static let AddMemeSegue = "Add Meme"
         static let ShowMemeSegue = "Show Meme"
     }
-
-    // MARK: - Model
-
-    var memes = [Meme]()
 
     // MARK: - Lifecycle Methods
 
@@ -34,20 +31,12 @@ class SavedMemesTableViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
-
     }
 
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
 
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        memes = appDelegate.memes
-
         tableView.reloadData()
-
-        if memes.count == 0 {
-            performSegueWithIdentifier(Defaults.AddMemeSegue, sender: self)
-        }
     }
 
     // MARK: - Table View Data Source
@@ -57,13 +46,15 @@ class SavedMemesTableViewController: UITableViewController {
     }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return memes.count
+        return Model.sharedInstance.memes.count
     }
 
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(Defaults.MemeCell, forIndexPath: indexPath) as! SavedMemeTableViewCell
 
-        cell.meme = memes[indexPath.row]
+        if cell.meme != Model.sharedInstance.memes[indexPath.row] {
+            cell.meme = Model.sharedInstance.memes[indexPath.row]
+        }
 
         return cell
     }
@@ -80,17 +71,24 @@ class SavedMemesTableViewController: UITableViewController {
     }
     */
 
-    /*
-    // Override to support editing the table view.
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
-            // Delete the row from the data source
+            // Remove image from disk
+            let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first as! String
+            let absoluteFilePath = documentsDirectory.stringByAppendingPathComponent(Model.sharedInstance.memes[indexPath.row].pathToEditedImage)
+            NSFileManager.defaultManager().removeItemAtPath(absoluteFilePath, error: NSErrorPointer())
+
+            // Remove object from CoreData
+            CoreDataStackManager.sharedInstance.managedObjectContext?.deleteObject(Model.sharedInstance.memes[indexPath.row])
+            CoreDataStackManager.sharedInstance.saveContext()
+
+            // Remove object from memory
+            Model.sharedInstance.memes.removeAtIndex(indexPath.row)
+
+            // Remove cell from TableView
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        } else if editingStyle == .Insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+        }
     }
-    */
 
     /*
     // Override to support rearranging the table view.
@@ -115,7 +113,7 @@ class SavedMemesTableViewController: UITableViewController {
             case Defaults.ShowMemeSegue:
                 let showMemeVC = segue.destinationViewController as! ShowMemeViewController
                 if let indexPath = tableView.indexPathForSelectedRow() {
-                    showMemeVC.meme = memes[indexPath.row]
+                    showMemeVC.memeImage = (tableView.cellForRowAtIndexPath(indexPath) as! SavedMemeTableViewCell).memeImageView.image
                 }
             default:
                 break

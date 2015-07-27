@@ -10,6 +10,8 @@ import UIKit
 
 class ShowMemeViewController: UIViewController {
 
+    // MARK: - Actions and Outlets
+
     @IBOutlet weak var imageView: UIImageView! {
         didSet {
             setImage()
@@ -21,14 +23,18 @@ class ShowMemeViewController: UIViewController {
         navigationController!.setNavigationBarHidden(!hidden, animated: true)
     }
 
-    var meme: Meme? {
+    // MARK: - Properties
+
+    var memeImage: UIImage? {
         didSet {
             setImage()
         }
     }
 
+    // MARK: - Auxiliary methods
+
     private func setImage() {
-        imageView?.image = meme?.getMeme()
+        imageView?.image = memeImage
     }
 
     private func setContentMode() {
@@ -41,6 +47,8 @@ class ShowMemeViewController: UIViewController {
             }
         }
     }
+
+    // MARK: - ViewController methods
 
     override func viewDidLoad() {
         super.viewDidLoad()

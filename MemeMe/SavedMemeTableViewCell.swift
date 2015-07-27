@@ -10,22 +10,28 @@ import UIKit
 
 class SavedMemeTableViewCell: UITableViewCell {
 
+    // MARK: Magic values
+
     private struct Defaults {
         static let MemeFontName = "HelveticaNeue-CondensedBlack"
         static let MemeFontSize: CGFloat = 12
     }
 
+    // MARK: - Actions and Outlets
+
     @IBOutlet weak var memeImageView: UIImageView! {
         didSet {
-            memeImageView?.image = meme?.getMeme()
+            setMemeImage()
         }
     }
+
     @IBOutlet weak var topTextLabel: UILabel! {
         didSet {
             topTextLabel.font = UIFont(name: Defaults.MemeFontName, size: Defaults.MemeFontSize)!
             topTextLabel?.text = meme?.topText
         }
     }
+
     @IBOutlet weak var bottomTextLabel: UILabel! {
         didSet {
             bottomTextLabel.font = UIFont(name: Defaults.MemeFontName, size: Defaults.MemeFontSize)!
@@ -33,22 +39,34 @@ class SavedMemeTableViewCell: UITableViewCell {
         }
     }
 
+    // MARK: - Properties
+
     var meme: Meme? {
         didSet {
-            memeImageView?.image = meme?.getMeme()
-            topTextLabel?.text = meme?.topText
-            bottomTextLabel?.text = meme?.bottomText
+            topTextLabel?.text = meme!.topText
+            bottomTextLabel?.text = meme!.bottomText
+
+            setMemeImage()
         }
     }
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
+    // MARK: - Auxiliary methods
 
-    override func setSelected(selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    private func setMemeImage() {
+        if let imageView = memeImageView, meme = meme {
+            let qos = Int(QOS_CLASS_USER_INITIATED.value)
+            let queue = dispatch_get_global_queue(qos, 0)
+            dispatch_async(queue) {
+                let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first as! String
+                let absoluteFilePath = documentsDirectory.stringByAppendingPathComponent(meme.pathToEditedImage)
+                if let editedImage = UIImage(contentsOfFile: absoluteFilePath) {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        if self.meme?.pathToEditedImage == meme.pathToEditedImage {
+                            imageView.image = editedImage
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -8,23 +8,29 @@
 
 import Foundation
 import UIKit
+import CoreData
 
-class Meme {
+//@objc(Meme)
+class Meme: NSManagedObject {
 
-    var originalImage: UIImage
-    var topText: String
-    var bottomText: String
+    // MARK: - Persistent properties
 
-    var combinedImage: UIImage
+    @NSManaged var pathToEditedImage: String
+    @NSManaged var topText: String
+    @NSManaged var bottomText: String
 
-    init(originalImage: UIImage, topText: String, bottomText: String, memeImage: UIImage) {
-        self.originalImage = originalImage
-        self.topText = topText
-        self.bottomText = bottomText
-        self.combinedImage = memeImage
+    // MARK: - Initializers
+
+    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
 
-    func getMeme() -> UIImage {
-        return combinedImage
+    init(context: NSManagedObjectContext, pathToEditedImage: String, topText: String, bottomText: String) {
+        let entity =  NSEntityDescription.entityForName(Model.Defaults.MemeEntityName, inManagedObjectContext: context)!
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
+
+        self.pathToEditedImage = pathToEditedImage
+        self.topText = topText
+        self.bottomText = bottomText
     }
 }
