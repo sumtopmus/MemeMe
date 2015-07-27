@@ -33,4 +33,20 @@ class Meme: NSManagedObject {
         self.topText = topText
         self.bottomText = bottomText
     }
+
+    // MARK: - Methods
+
+    func loadImage(completion: UIImage -> Void) {
+        let qos = Int(QOS_CLASS_USER_INITIATED.value)
+        let queue = dispatch_get_global_queue(qos, 0)
+        dispatch_async(queue) {
+            let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first as! String
+            let absoluteFilePath = documentsDirectory.stringByAppendingPathComponent(self.pathToEditedImage)
+            if let editedImage = UIImage(contentsOfFile: absoluteFilePath) {
+                dispatch_async(dispatch_get_main_queue()) {
+                    completion(editedImage)
+                }
+            }
+        }
+    }
 }

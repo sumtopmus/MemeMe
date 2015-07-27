@@ -23,7 +23,6 @@
                                 <gestureRecognizers/>
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="Ksp-Eg-eep" appends="YES" id="2Qf-g5-1Ez"/>
-                                    <outletCollection property="gestureRecognizers" destination="Ksp-Eg-eep" appends="YES" id="csf-op-j7L"/>
                                 </connections>
                             </imageView>
                         </subviews>
@@ -70,6 +69,9 @@
                                 <subviews>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="tLU-1M-TW6">
                                         <rect key="frame" x="0.0" y="0.0" width="600" height="580"/>
+                                        <connections>
+                                            <outletCollection property="gestureRecognizers" destination="LQL-8O-Dvr" appends="YES" id="XwA-1G-Lmi"/>
+                                        </connections>
                                     </imageView>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Pbb-bg-A1H" userLabel="Top Text Field">
                                         <rect key="frame" x="8" y="50" width="584" height="17"/>
@@ -146,6 +148,9 @@
                                 <exclude reference="opT-S6-wuw"/>
                             </mask>
                         </variation>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="LQL-8O-Dvr" appends="YES" id="fT6-Yh-hRn"/>
+                        </connections>
                     </view>
                     <connections>
                         <outlet property="bottomTextField" destination="FDJ-dc-1os" id="24I-Px-Jgn"/>
@@ -159,6 +164,11 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="LQL-8O-Dvr">
+                    <connections>
+                        <action selector="onImageTap:" destination="BYZ-38-t0r" id="J6G-Hp-1WL"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="2964" y="1438"/>
         </scene>
@@ -195,7 +205,7 @@
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vnW-P5-KDK" userLabel="Top Text">
                                                     <rect key="frame" x="172" y="11.5" width="42" height="20.5"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
@@ -217,7 +227,7 @@
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cys-au-nTO" userLabel="Bottom Text">
                                                     <rect key="frame" x="172" y="11" width="42" height="20.5"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
@@ -286,16 +296,13 @@
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="cGS-aR-61F">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="kmD-GL-AOK">
                             <size key="itemSize" width="120" height="120"/>
                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
                             <size key="footerReferenceSize" width="0.0" height="0.0"/>
                             <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                         </collectionViewFlowLayout>
-                        <imageView key="backgroundView" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" id="xFN-2d-HGh">
-                            <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        </imageView>
                         <cells>
                             <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="Meme Collection View Cell" id="QmE-4c-1Wf" customClass="SavedMemeCollectionViewCell" customModule="MemeMe" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
@@ -304,7 +311,7 @@
                                     <rect key="frame" x="0.0" y="0.0" width="120" height="120"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="YbQ-7N-gJl">
+                                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="YbQ-7N-gJl">
                                             <rect key="frame" x="0.0" y="0.0" width="120" height="120"/>
                                         </imageView>
                                     </subviews>
@@ -317,7 +324,7 @@
                                     <constraint firstItem="YbQ-7N-gJl" firstAttribute="top" secondItem="QmE-4c-1Wf" secondAttribute="top" id="lTA-jK-xqm"/>
                                 </constraints>
                                 <connections>
-                                    <outlet property="imageView" destination="YbQ-7N-gJl" id="YHv-H4-Ttr"/>
+                                    <outlet property="memeImageView" destination="YbQ-7N-gJl" id="N5n-7x-3AY"/>
                                     <segue destination="3NV-Wr-jkp" kind="show" identifier="Show Meme" id="5Kb-xN-NoC"/>
                                 </connections>
                             </collectionViewCell>

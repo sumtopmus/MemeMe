@@ -54,17 +54,9 @@ class SavedMemeTableViewCell: UITableViewCell {
 
     private func setMemeImage() {
         if let imageView = memeImageView, meme = meme {
-            let qos = Int(QOS_CLASS_USER_INITIATED.value)
-            let queue = dispatch_get_global_queue(qos, 0)
-            dispatch_async(queue) {
-                let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first as! String
-                let absoluteFilePath = documentsDirectory.stringByAppendingPathComponent(meme.pathToEditedImage)
-                if let editedImage = UIImage(contentsOfFile: absoluteFilePath) {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        if self.meme?.pathToEditedImage == meme.pathToEditedImage {
-                            imageView.image = editedImage
-                        }
-                    }
+            meme.loadImage { image in
+                if self.meme?.pathToEditedImage == meme.pathToEditedImage {
+                    imageView.image = image
                 }
             }
         }

@@ -9,16 +9,32 @@
 import UIKit
 
 class SavedMemeCollectionViewCell: UICollectionViewCell {
-    
-    @IBOutlet weak var imageView: UIImageView! {
+
+    // MARK: - Actions and Outlets
+
+    @IBOutlet weak var memeImageView: UIImageView! {
         didSet {
-            imageView?.image = memeImage
+            setMemeImage()
         }
     }
 
-    var memeImage: UIImage? {
+    // MARK: - Properties
+
+    var meme: Meme? {
         didSet {
-            imageView?.image = memeImage
+            setMemeImage()
+        }
+    }
+
+    // MARK: - Auxiliary methods
+
+    private func setMemeImage() {
+        if let imageView = memeImageView, meme = meme {
+            meme.loadImage { image in
+                if self.meme?.pathToEditedImage == meme.pathToEditedImage {
+                    imageView.image = image
+                }
+            }
         }
     }
 }

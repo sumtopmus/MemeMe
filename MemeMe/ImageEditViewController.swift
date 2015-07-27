@@ -84,7 +84,15 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
 
         presentViewController(activityVC, animated: true, completion: nil)
     }
-    
+
+    @IBAction func onImageTap(sender: UITapGestureRecognizer) {
+        topTextField.resignFirstResponder()
+        bottomTextField.resignFirstResponder()
+//        let hidden = topToolbar.hidden
+//        topToolbar.hidden = !hidden
+//        bottomToolbar.hidden = !hidden
+    }
+
     // MARK: - Layout
 
     var textOffsetConstraints = [NSLayoutConstraint]()

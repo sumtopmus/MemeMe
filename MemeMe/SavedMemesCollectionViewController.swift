@@ -27,41 +27,31 @@ class SavedMemesCollectionViewController: UICollectionViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Register cell classes
-        self.collectionView!.registerClass(SavedMemeCollectionViewCell.self, forCellWithReuseIdentifier: Defaults.MemeCell)
-
-        // Do any additional setup after loading the view.
     }
 
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
 
         collectionView?.reloadData()
-
-        if memes.count == 0 {
-            performSegueWithIdentifier(Defaults.AddMemeSegue, sender: self)
-        }
     }
 
     // MARK: Collection View Data Source
 
-//    override func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-//        return 1
-//    }
+    override func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+        return 1
+    }
 
 
     override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return memes.count
+        return Model.sharedInstance.memes.count
     }
 
     override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(Defaults.MemeCell, forIndexPath: indexPath) as! SavedMemeCollectionViewCell
-    
-//        cell.memeImage = memes[indexPath.row].getMeme()
+
+        if cell.meme != Model.sharedInstance.memes[indexPath.row] {
+            cell.meme = Model.sharedInstance.memes[indexPath.row]
+        }
 
         return cell
     }
@@ -104,8 +94,9 @@ class SavedMemesCollectionViewController: UICollectionViewController {
             switch identifier {
             case Defaults.ShowMemeSegue:
                 let showMemeVC = segue.destinationViewController as! ShowMemeViewController
-                if let indexPath = collectionView?.indexPathsForSelectedItems().first as? NSIndexPath {
-//                    showMemeVC.meme = memes[indexPath.row]
+                if let indexPath = collectionView?.indexPathsForSelectedItems() as? [NSIndexPath] {
+                    let cell = collectionView?.cellForItemAtIndexPath(indexPath[0]) as! SavedMemeCollectionViewCell
+                    showMemeVC.memeImage = cell.memeImageView.image
                 }
             default:
                 break
