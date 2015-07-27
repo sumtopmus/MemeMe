@@ -1,5 +1,5 @@
 //
-//  CoreDataStackManager.swift
+//  CoreDataManager.swift
 //  MemeMe
 //
 //  Created by Oleksandr Iaroshenko on 06.06.15.
@@ -9,7 +9,7 @@
 import Foundation
 import CoreData
 
-class CoreDataStackManager {
+class CoreDataManager {
 
     // MARK: - Magic values
     private struct Defaults {
@@ -20,11 +20,11 @@ class CoreDataStackManager {
 
     // MARK: - Singleton pattern
 
-    static let sharedInstance = CoreDataStackManager()
+    static let sharedInstance = CoreDataManager()
 
     // MARK: - Core Data stack
 
-    var managedObjectContext: NSManagedObjectContext?
+    var context: NSManagedObjectContext?
 
     private init() {
         let modelURL = NSBundle.mainBundle().URLForResource(Defaults.Model, withExtension: Defaults.ModelExtension)!
@@ -36,15 +36,15 @@ class CoreDataStackManager {
 
         if let storeAdded = coordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: sqlBaseURL, options: nil, error: NSErrorPointer()) {
 
-            managedObjectContext = NSManagedObjectContext()
-            managedObjectContext!.persistentStoreCoordinator = coordinator
+            context = NSManagedObjectContext()
+            context!.persistentStoreCoordinator = coordinator
         }
     }
 
     // MARK: - Core Data saving support
     
     func saveContext () {
-        if let context = managedObjectContext {
+        if let context = context {
             if context.hasChanges && !context.save(NSErrorPointer()) {
                 println("Log: Changes were not saved to disk.")
             }

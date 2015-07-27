@@ -7,14 +7,17 @@
 //
 
 import UIKit
+import CoreData
 
 // TODO: Check why the font is transparent (NSForegroundColorAttributeName does not change the appearance)
 // TODO: If keyboard is dismissed with CMD+K and bottomTextField started editing, press CMD+K again. The meme view will fly away upwards.
 // TODO: Add custom crop/scale for both(?) original and combined images
+// TODO: Add icons for table/collection views
 
 class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
 
     // MARK: - Magic values
+
     private struct Defaults {
         static let MemeFontName = "HelveticaNeue-CondensedBlack"
         static let MemeFontSize: CGFloat = 40
@@ -88,9 +91,6 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
     @IBAction func onImageTap(sender: UITapGestureRecognizer) {
         topTextField.resignFirstResponder()
         bottomTextField.resignFirstResponder()
-//        let hidden = topToolbar.hidden
-//        topToolbar.hidden = !hidden
-//        bottomToolbar.hidden = !hidden
     }
 
     // MARK: - Layout
@@ -213,25 +213,33 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
     }
 
     private func saveMeme(memeImage: UIImage) {
-        if let context = CoreDataStackManager.sharedInstance.managedObjectContext {
-            let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first as! String
-            let memesDirectory = documentsDirectory.stringByAppendingPathComponent(Defaults.MemesDirectory)
-            let fileName = ImageEditViewController.getFileNameForNewMeme()
-            let absoluteFilePath = memesDirectory.stringByAppendingPathComponent(fileName)
-            let relativeFilePath = Defaults.MemesDirectory.stringByAppendingPathComponent(fileName)
-            if !NSFileManager.defaultManager().fileExistsAtPath(memesDirectory) {
-                var error: NSError?
-                NSFileManager.defaultManager().createDirectoryAtPath(memesDirectory, withIntermediateDirectories: false, attributes: nil, error: &error)
-            }
-            UIImagePNGRepresentation(memeImage).writeToFile(absoluteFilePath, atomically: true)
+        if let context = CoreDataManager.sharedInstance.context {
+            let path = saveMemeToFile(memeImage)
 
-            let meme = Meme(context: context, pathToEditedImage: relativeFilePath, topText: topTextField.text, bottomText: bottomTextField.text)
-            Model.sharedInstance.memes.append(meme)
-            CoreDataStackManager.sharedInstance.saveContext()
+            let meme = Meme(context: context, pathToEditedImage: path, topText: topTextField.text, bottomText: bottomTextField.text)
+
+            CoreDataManager.sharedInstance.saveContext()
         }
     }
 
-    private class func getFileNameForNewMeme() -> String {
+    private func saveMemeToFile(memeImage: UIImage) -> String {
+        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first as! String
+        let memesDirectory = documentsDirectory.stringByAppendingPathComponent(Defaults.MemesDirectory)
+        let fileName = getFileNameForNewMeme()
+
+        let absoluteFilePath = memesDirectory.stringByAppendingPathComponent(fileName)
+        let relativeFilePath = Defaults.MemesDirectory.stringByAppendingPathComponent(fileName)
+
+        if !NSFileManager.defaultManager().fileExistsAtPath(memesDirectory) {
+            NSFileManager.defaultManager().createDirectoryAtPath(memesDirectory, withIntermediateDirectories: false, attributes: nil, error: NSErrorPointer())
+        }
+
+        UIImagePNGRepresentation(memeImage).writeToFile(absoluteFilePath, atomically: true)
+
+        return relativeFilePath
+    }
+
+    private func getFileNameForNewMeme() -> String {
         let currentDateTime = NSDate()
         let formatter = NSDateFormatter()
         formatter.dateFormat = Defaults.DateFormat

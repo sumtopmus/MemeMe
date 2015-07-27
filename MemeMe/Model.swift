@@ -12,27 +12,31 @@ import CoreData
 class Model {
 
     // MARK: - Magic values
+
     struct Defaults {
         static let MemeEntityName = "Meme"
+        static let MemeSortingKey = "timeStamp"
     }
 
     // MARK: - Singleton pattern
 
     static let sharedInstance = Model()
 
+    private init() {
+        content?.performFetch(NSErrorPointer())
+    }
+
     // MARK: - Model
 
-    var memes = [Meme]()
-
-    private init() {
-        fetchAllMemes()
-    }
-
-    func fetchAllMemes() {
+    var content: NSFetchedResultsController? = {
         let fetchRequest = NSFetchRequest(entityName: Defaults.MemeEntityName)
-        var error: NSError?
-        if let results: [AnyObject] = CoreDataStackManager.sharedInstance.managedObjectContext?.executeFetchRequest(fetchRequest, error: &error) {
-            memes = results as! [Meme]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: Defaults.MemeSortingKey, ascending: true)]
+
+        var result: NSFetchedResultsController?
+        if let context = CoreDataManager.sharedInstance.context {
+            result =  NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil)
         }
-    }
+
+        return result
+    }()
 }

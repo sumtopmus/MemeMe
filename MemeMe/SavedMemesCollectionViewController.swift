@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class SavedMemesCollectionViewController: UICollectionViewController {
 
@@ -43,14 +44,16 @@ class SavedMemesCollectionViewController: UICollectionViewController {
 
 
     override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return Model.sharedInstance.memes.count
+        let sectionInfo = Model.sharedInstance.content!.sections![section] as! NSFetchedResultsSectionInfo
+        return sectionInfo.numberOfObjects
     }
 
     override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(Defaults.MemeCell, forIndexPath: indexPath) as! SavedMemeCollectionViewCell
 
-        if cell.meme != Model.sharedInstance.memes[indexPath.row] {
-            cell.meme = Model.sharedInstance.memes[indexPath.row]
+        let meme = Model.sharedInstance.content!.objectAtIndexPath(indexPath) as! Meme
+        if cell.meme != meme {
+            cell.meme = meme
         }
 
         return cell

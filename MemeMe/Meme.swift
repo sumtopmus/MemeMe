@@ -19,6 +19,8 @@ class Meme: NSManagedObject {
     @NSManaged var topText: String
     @NSManaged var bottomText: String
 
+    @NSManaged var timeStamp: NSDate
+
     // MARK: - Initializers
 
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
@@ -32,6 +34,8 @@ class Meme: NSManagedObject {
         self.pathToEditedImage = pathToEditedImage
         self.topText = topText
         self.bottomText = bottomText
+
+        self.timeStamp = NSDate()
     }
 
     // MARK: - Methods

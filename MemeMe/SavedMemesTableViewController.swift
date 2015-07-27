@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class SavedMemesTableViewController: UITableViewController {
+class SavedMemesTableViewController: UITableViewController, NSFetchedResultsControllerDelegate {
 
     // MARK: - Magic values
     private struct Defaults {
@@ -26,17 +26,38 @@ class SavedMemesTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        Model.sharedInstance.content?.delegate = self
     }
 
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
 
         tableView.reloadData()
+    }
+
+    // MARK: - NSFetchResultsControllerDelegate methods
+
+    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        tableView.beginUpdates()
+    }
+
+    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+        // No implementation
+    }
+
+    func controller(controller: NSFetchedResultsController, didChangeObject object: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+        switch type {
+        case .Insert:
+            tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Fade)
+        case .Delete:
+            tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Fade)
+        default:
+            return
+        }
+    }
+
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        tableView.endUpdates()
     }
 
     // MARK: - Table View Data Source
@@ -46,14 +67,16 @@ class SavedMemesTableViewController: UITableViewController {
     }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Model.sharedInstance.memes.count
+        let sectionInfo = Model.sharedInstance.content!.sections![section] as! NSFetchedResultsSectionInfo
+        return sectionInfo.numberOfObjects
     }
 
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(Defaults.MemeCell, forIndexPath: indexPath) as! SavedMemeTableViewCell
 
-        if cell.meme != Model.sharedInstance.memes[indexPath.row] {
-            cell.meme = Model.sharedInstance.memes[indexPath.row]
+        let meme = Model.sharedInstance.content!.objectAtIndexPath(indexPath) as! Meme
+        if cell.meme != meme {
+            cell.meme = meme
         }
 
         return cell
@@ -65,17 +88,16 @@ class SavedMemesTableViewController: UITableViewController {
 
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
+            let meme = Model.sharedInstance.content!.objectAtIndexPath(indexPath) as! Meme
+
             // Remove image from disk
             let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first as! String
-            let absoluteFilePath = documentsDirectory.stringByAppendingPathComponent(Model.sharedInstance.memes[indexPath.row].pathToEditedImage)
+            let absoluteFilePath = documentsDirectory.stringByAppendingPathComponent(meme.pathToEditedImage)
             NSFileManager.defaultManager().removeItemAtPath(absoluteFilePath, error: NSErrorPointer())
 
             // Remove object from CoreData
-            CoreDataStackManager.sharedInstance.managedObjectContext?.deleteObject(Model.sharedInstance.memes[indexPath.row])
-            CoreDataStackManager.sharedInstance.saveContext()
-
-            // Remove object from memory
-            Model.sharedInstance.memes.removeAtIndex(indexPath.row)
+            CoreDataManager.sharedInstance.context?.deleteObject(meme)
+            CoreDataManager.sharedInstance.saveContext()
 
             // Remove cell from TableView
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
