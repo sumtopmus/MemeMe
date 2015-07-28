@@ -231,7 +231,7 @@ class ImageEditViewController: UIViewController, UIImagePickerControllerDelegate
         let relativeFilePath = Defaults.MemesDirectory.stringByAppendingPathComponent(fileName)
 
         if !NSFileManager.defaultManager().fileExistsAtPath(memesDirectory) {
-            NSFileManager.defaultManager().createDirectoryAtPath(memesDirectory, withIntermediateDirectories: false, attributes: nil, error: NSErrorPointer())
+            NSFileManager.defaultManager().createDirectoryAtPath(memesDirectory, withIntermediateDirectories: false, attributes: nil, error: nil)
         }
 
         UIImagePNGRepresentation(memeImage).writeToFile(absoluteFilePath, atomically: true)

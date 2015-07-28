@@ -23,7 +23,7 @@ class Model {
     static let sharedInstance = Model()
 
     private init() {
-        content?.performFetch(NSErrorPointer())
+        content?.performFetch(nil)
     }
 
     // MARK: - Model

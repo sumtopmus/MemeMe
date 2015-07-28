@@ -93,7 +93,7 @@ class SavedMemesTableViewController: UITableViewController, NSFetchedResultsCont
             // Remove image from disk
             let documentsDirectory = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first as! String
             let absoluteFilePath = documentsDirectory.stringByAppendingPathComponent(meme.pathToEditedImage)
-            NSFileManager.defaultManager().removeItemAtPath(absoluteFilePath, error: NSErrorPointer())
+            NSFileManager.defaultManager().removeItemAtPath(absoluteFilePath, error: nil)
 
             // Remove object from CoreData
             CoreDataManager.sharedInstance.context?.deleteObject(meme)

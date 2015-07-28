@@ -34,7 +34,7 @@ class CoreDataManager {
         let documentsDirURL = NSFileManager.defaultManager().URLsForDirectory(NSSearchPathDirectory.DocumentDirectory, inDomains: NSSearchPathDomainMask.UserDomainMask).first as! NSURL
         let sqlBaseURL = documentsDirURL.URLByAppendingPathComponent(Defaults.SQLBase)
 
-        if let storeAdded = coordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: sqlBaseURL, options: nil, error: NSErrorPointer()) {
+        if let storeAdded = coordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: sqlBaseURL, options: nil, error: nil) {
 
             context = NSManagedObjectContext()
             context!.persistentStoreCoordinator = coordinator
@@ -45,7 +45,7 @@ class CoreDataManager {
     
     func saveContext () {
         if let context = context {
-            if context.hasChanges && !context.save(NSErrorPointer()) {
+            if context.hasChanges && !context.save(nil) {
                 println("Log: Changes were not saved to disk.")
             }
         }
