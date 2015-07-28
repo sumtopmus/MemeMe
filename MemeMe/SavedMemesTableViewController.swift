@@ -98,9 +98,6 @@ class SavedMemesTableViewController: UITableViewController, NSFetchedResultsCont
             // Remove object from CoreData
             CoreDataManager.sharedInstance.context?.deleteObject(meme)
             CoreDataManager.sharedInstance.saveContext()
-
-            // Remove cell from TableView
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
         }
     }
 
